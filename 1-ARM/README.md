@@ -59,3 +59,17 @@ The first step would be to create a simple pipeline as suggested by George. To d
 - Set Condition Operations
 - Immediate Value Handling
 - Shifted Operand Handling
+
+
+- Data Transfer Instructions
+	- Single Register load/store
+	- Multiple Register load/store
+	- Single Register Swap
+
+
+- Register Indirect Addressing
+	- LDR r0, [r1]
+	- Adding immediate or register offset to base
+
+
+
