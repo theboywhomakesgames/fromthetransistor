@@ -5,6 +5,10 @@ I'm trying to come up with a step by step implementation plan to create an ARM p
 The most important PDF file in this directory would be ARMsoc.pdf. It's a book from Steve Furber. I'm not sure if I'm violating the copy-right by sharing it. Just let me know Steve if you don't want your book to be shared like this :D. I'll just remove it and write the essential information for this project in this readme instead.
 
 
+## Warning
+All page numbers mentioned in this document are pdf page numbers. The ones shown in the pdf viewer and not the ones on the actual pages as they're quite different.
+
+
 ## 1- Memory
 Code a memory of any sort. It should be 32-bit addressable and little endian.
 
@@ -15,23 +19,64 @@ These should be implemented before getting to the next part. They form the found
 
 ### 1- Code the basic gates
 ### 2- Code the ALU
+- Implement the ARM6 carry-select adder (p101).
+- Inverters (p102)
+- Logic Functions
+- Result Mux
+- Zero Detect
+- Make sure you have all the io signals implemented for the ALU
+
+
 ### 3- Code a clock generator
+A 2-phase non-overlapping clock generator. This 2-phase clock is used in 2 sets of latches. Some of them are open duren phase 1 and some during phase 2. The clock is non-overlapping (we have some time between the phases in which no latches are open) so that there is no race conditions. (p97)
 
 
-## 3- Pipeline
+## 3- Pipeline Modules
 To implement a pipeling we need to know how many stages we have. For simplicity we'll assume 3. The following modules should be implemented for a 3-stage pipeline:
 
-- The Register Bank
+- The Register Bank (p108)
 	- two read ports & one write port
 	- an additional read and write port for r15(pc)
 
-- The Barrel Shifter
-- The ALU
+- The Barrel Shifter (p103) (Must work without a clock | Combinational)
 - The Address Register & Incrementer (selecs and holds memory addresses and generates sequential addresses)
 - The Data Register (data passing to/from memory)
+- High-speed Multiplier (p105)
+- Datapath Layout (p109)
 
 
-## 4- Instruction Decoder
+As a ++, one can turn this into a 5-stage pipeline with data forwarding and stuff.
+
+
+A 3-stage pipeline will include:
+1- Fetch
+2- Decode
+3- Execute
+
+
+Each of which should have seperate independent hardware.
+
+
+## 4- Datapath Timing
+###1- Phase 1 goes high: 
+- Selected registers discharge the *read buses which become valid in phase 1*.
+- One operand is passed through barrel shifter and shifter's output is available shortly after
+- *ALU input latches are open during phase 1*
+
+
+###2- Phase 1 goes low:
+- *ALU input latches close* so that the read bus precharge doesn't go through (precharge?!)
+
+
+###3- Phase 2:
+- *ALU destination latches are open in phase 2*
+- ALU processes the operands. A valid output will be available towards the end of the phase
+
+
+## 5- Instruction Decoder
+The pipeline procedures are in page 93 of ARMsoc.pdf. PLA in p110.
+
+
 - Arithmetic Operations:
 	ADD
 	ADC
