@@ -58,17 +58,17 @@ Each of which should have seperate independent hardware.
 
 
 ## 4- Datapath Timing
-###1- Phase 1 goes high: 
+### 1- Phase 1 goes high: 
 - Selected registers discharge the *read buses which become valid in phase 1*.
 - One operand is passed through barrel shifter and shifter's output is available shortly after
 - *ALU input latches are open during phase 1*
 
 
-###2- Phase 1 goes low:
+### 2- Phase 1 goes low:
 - *ALU input latches close* so that the read bus precharge doesn't go through (precharge?!)
 
 
-###3- Phase 2:
+### 3- Phase 2:
 - *ALU destination latches are open in phase 2*
 - ALU processes the operands. A valid output will be available towards the end of the phase
 
