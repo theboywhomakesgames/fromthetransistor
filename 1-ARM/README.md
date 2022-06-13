@@ -10,7 +10,7 @@ All page numbers mentioned in this document are pdf page numbers. The ones shown
 
 
 ## 1- Memory
-Code a memory of any sort. It should be 32-bit addressable and little endian.
+Code a memory of any sort. It should be 32-bit addressable and little-endian (or not!).
 
 
 ## 2- Basic Modules
@@ -165,3 +165,6 @@ The pipeline procedures are in page 93 of ARMsoc.pdf. PLA in p110.
 
 - Stack Instructions
 	- STMFD, LDMFD, ...
+
+
+## 6- Exceptions / Privileged mode / etc.
