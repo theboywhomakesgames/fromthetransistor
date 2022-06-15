@@ -44,6 +44,8 @@ To implement a pipeling we need to know how many stages we have. For simplicity 
 - High-speed Multiplier (p105)
 - Datapath Layout (p109)
 
+![image](https://user-images.githubusercontent.com/25264657/173847176-cb8f33a2-661d-4ccc-9d91-3489fc413bb2.png)
+![image](https://user-images.githubusercontent.com/25264657/173847504-a6ef4371-21b8-485b-a200-d06147609e13.png)
 
 As a ++, one can turn this into a 5-stage pipeline with data forwarding and stuff.
 
