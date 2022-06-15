@@ -37,6 +37,7 @@ To implement a pipeling we need to know how many stages we have. For simplicity 
 - The Register Bank (p108)
 	- two read ports & one write port
 	- an additional read and write port for r15(pc)
+![image](https://user-images.githubusercontent.com/25264657/173862313-d5caf317-a00f-441f-ae51-d21cc59f3b02.png)
 
 - The Barrel Shifter (p103) (Must work without a clock | Combinational)
 - The Address Register & Incrementer (selecs and holds memory addresses and generates sequential addresses)
