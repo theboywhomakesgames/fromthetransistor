@@ -171,3 +171,11 @@ The pipeline procedures are in page 93 of ARMsoc.pdf. PLA in p110.
 
 
 ## 6- Exceptions / Privileged mode / etc.
+
+# Actual ordered tasks
+1- Code basic gates
+2- Code basic components
+3- Code all the pipeline modules (excluding the decoder and instruction register)
+4- Code a test instruction register that just reads the next element of an array on clock tick
+5- Code a decoder for basic data processing (ADD, SUB, etc.)
+6- 
