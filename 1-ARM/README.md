@@ -179,5 +179,8 @@ The pipeline procedures are in page 93 of ARMsoc.pdf. PLA in p110.
 4. Code a test instruction register that just reads the next element of an array on clock tick
 5. Code a decoder for basic data processing (ADD, SUB, etc.)
 ![image](https://user-images.githubusercontent.com/25264657/175939294-6e0d9dd9-81a5-4047-be0a-54652df8b631.png)
+![image](https://user-images.githubusercontent.com/25264657/175939796-2562b157-0533-4785-8a7a-54fae130a206.png)
+
 6. Multiplication instructions
 ![image](https://user-images.githubusercontent.com/25264657/175939635-5a223dd9-b18b-4673-9ec1-5e5615b37e80.png)
+![image](https://user-images.githubusercontent.com/25264657/175939837-34294b6d-ed3d-4953-990b-b40a4b5a63a5.png)
