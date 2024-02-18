@@ -12,8 +12,7 @@ module uart_tx
 	input[7:0]                   tx_data,          //data to send
 	input                        tx_data_valid,    //data to be sent is valid
 	output reg                   tx_data_ready,    //send ready
-	output                       tx_pin,           //serial data output
-    output reg[5:0]              led
+	output                       tx_pin            //serial data output
 );
 //calculates the clock cycle for baud rate 
 localparam                       CYCLE = CLK_FRE * 1000000 / BAUD_RATE;
@@ -64,9 +63,8 @@ begin
 		default:
 			next_state <= S_IDLE;
 	endcase
-
-    // led[2:0] <= ~state;
 end
+
 always@(posedge clk or negedge rst_n)
 begin
 	if(rst_n == 1'b0)

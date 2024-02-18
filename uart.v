@@ -11,7 +11,16 @@ module uart(
     output                  tx_pin,
     output reg[7:0]         data,
     output wire             rx_data_valid,
-    output [5:0]            led
+
+    inout wire[13:0]        bus_address,
+    output wire[31:0]       bus_datai,
+    input wire[31:0]        bus_datao,
+    inout wire[7:0]         bus_control,
+
+    output reg              bus_req,
+    output reg              bus_use,
+    input                   bus_available,
+    input                   fulfilled
 );
 
 parameter CLK_FREQ=         27000000;
@@ -27,12 +36,9 @@ reg         tx_valid;
 reg         ready;
 reg[7:0]    tx_data;
 
+reg[7:0] buffer[3:0];
 // uart test
-reg [7:0] buffer[0:64];
-reg [7:0] bufferidx;
-
-wire[7:0] idx;
-assign idx = bufferidx;
+reg [2:0] bufferidx;
 
 uart_rx#(
     .CLKS_PER_BIT(CLKS_PER_BIT)
@@ -48,37 +54,56 @@ uart_rx#(
 uart_tx#(
     .CLK_FRE(27),
     .BAUD_RATE(BAUD_RATE)
-) tx(clk, rst_n, tx_data, tx_valid, tx_ready, tx_pin, led[5:0]);
+) tx(clk, rst_n, tx_data, tx_valid, tx_ready, tx_pin);
 
 // clock counter
 reg[31:0] cc;
+reg[31:0] cc1;
+
+assign bus_control = 8'd0;
+assign bus_address = 32'h00000041;
+
+// initialize
+always @(negedge rst_n)
+begin
+    rx_data_ready <= 1'b1;
+end
+
+// make ready
+always @(posedge clk or negedge rst_n)
+begin
+    if(rst_n == 1'b0)
+    begin
+        ready <= 1'b0;
+        cc1 <= 32'd0;
+    end
+    else if(cc1 == CLK_FREQ)
+    begin
+        ready <= 1'b1;
+        cc1 <= 32'd0;
+    end
+    else
+    begin
+        ready <= ready;
+        cc1 <= cc1 + 32'd1;
+    end
+end
 
 // tx_valid set
 always @(posedge clk or negedge rst_n)
 begin
     if(rst_n == 1'b0)
     begin
-        buffer[0] <= 8'h48; // 'H'
-        buffer[1] <= 8'h65; // 'e'
-        buffer[2] <= 8'h6C; // 'l'
-        buffer[3] <= 8'h6C; // 'l'
-        buffer[4] <= 8'h6F; // 'o'
-        buffer[5] <= 8'h6F; // 'o'
-        buffer[6] <= 8'h00; // NULL
-        $display("set");
-
-        ready <= 1'b0;
         tx_valid <= 1'b0;
-        rx_data_ready <= 1'b1;
         cc <= 32'd0;
     end
 
     // keep tx_valid on for one uart cycle
     else if (cc == CLKS_PER_BIT - 1)
     begin
-        if(tx_valid == 1'b1)    tx_valid <= 1'b0;
-        else if(put == 1'b1)    tx_valid <= 1'b1;
-        else                    tx_valid <= tx_valid;
+        if(tx_valid == 1'b1) tx_valid <= 1'b0;
+        else if(put == 1'b1) tx_valid <= 1'b1;
+        else            tx_valid <= tx_valid;
 
         cc <= 32'd0;
     end
@@ -90,25 +115,126 @@ begin
     end
 end
 
-// put char
-reg put;
+// buffer data
+reg buffered;
 always @(posedge clk or negedge rst_n)
 begin
     if(rst_n == 1'b0)
     begin
-        bufferidx <= 8'd0;
-        put = 1'b0;
+        // TODO: change to 0 after test
+        buffered <= 1'b0;
+        bus_use <= 1'b0;
+        bus_req <= 1'b0;
     end
-    else if(tx_ready == 1'b1 && tx_valid == 1'b0)
+
+    else if(ready == 1'b1)
     begin
-        tx_data <= buffer[idx];
-        bufferidx <= bufferidx + 8'd1;
-        put <= 1'b1;
+        if(bus_available == 1'b0 && buffered == 1'b0)
+        begin
+            buffered <= 1'b0;
+            bus_use <= 1'b0;
+            bus_req <= 1'b1;
+        end
+
+        // req approved but not using
+        // start using
+        else if(bus_req == 1'b1 && bus_available == 1'b1 && bus_use == 1'b0)
+        begin
+            buffered <= 1'b0;
+            bus_use <= 1'b1;
+            bus_req <= 1'b0;
+        end
+
+        // using
+        else if(bus_use == 1'b1)
+        begin
+            // not fulfilled
+            // keep using
+            if(fulfilled == 1'b0)
+            begin
+                buffered <= 1'b0;
+                bus_use <= 1'b1;
+            end
+
+            // fulfilled
+            // buffer up - stop using
+            else
+            begin
+                buffer[0] <= bus_datao[31:24];
+                buffer[1] <= bus_datao[23:16];
+                buffer[2] <= bus_datao[15: 8];
+                buffer[3] <= bus_datao[ 7: 0];
+
+                buffered <= 1'b1;
+                bus_use <= 1'b0;
+            end
+
+            // no req while using
+            bus_req <= 1'b0;
+        end
+
+        // waiting for availability
+        else
+        begin
+            buffered <= buffered;
+            bus_use <= bus_use;
+            bus_req <= bus_req;
+        end
     end
+
+    // in initial wait phase
     else
     begin
-        put = 1'b0;
-        tx_data <= tx_data;
+        buffered <= buffered;
+        bus_use <= bus_use;
+        bus_req <= bus_req;
+    end
+end
+
+// put char
+reg put;
+reg [1:0]   idx_latch;
+
+always @(posedge clk or negedge rst_n)
+begin
+    if(rst_n == 1'b0)
+    begin
+        put <= 1'b0;
+        bufferidx <= 3'd0;
+    end
+
+    // TODO: execution not in sync with buffering
+    // TODO: Buffer idx condition not working
+    // TODO: it's printing more than buffer size?!?!?
+    else if(
+        tx_ready == 1'b1 &&
+        tx_valid == 1'b0 &&
+        put == 1'b0 &&
+        ready == 1'b1 &&
+        bufferidx < 4 &&
+        buffered == 1'b1
+    )
+    begin
+        tx_data <= buffer[3];
+        put <= 1'b1;
+        bufferidx <= bufferidx + 3'd1;
+    end
+
+    else if(cc == CLKS_PER_BIT - 1 && put == 1'b1 && tx_valid == 1'b0)
+    begin
+        put <= 1'b0;
+        bufferidx <= bufferidx;
+    end
+
+    else if(bufferidx == 4)
+    begin
+        put <= 1'b0;
+        bufferidx <= bufferidx;
+    end
+
+    else
+    begin
+        put <= put;
         bufferidx <= bufferidx;
     end
 end

@@ -9,7 +9,7 @@ IO_LOC "led[3]" 14;
 IO_LOC "led[4]" 15;
 IO_LOC "led[5]" 16;
 
-IO_LOC "uart_tx" 25;
-IO_PORT "uart_tx" IO_TYPE=LVCMOS33 PULL_MODE=UP;
-IO_LOC "uart_rx" 26;
-IO_PORT "uart_rx" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC "tx_pin" 25;
+IO_PORT "tx_pin" IO_TYPE=LVCMOS33 PULL_MODE=UP;
+IO_LOC "rx_pin" 26;
+IO_PORT "rx_pin" IO_TYPE=LVCMOS33 PULL_MODE=UP;

@@ -18,3 +18,9 @@ gowin_pack -d GW1N-9C -o output.fs pnr_output.json
 echo "--- DONE PACKING ---"
 
 openFPGALoader -b tangnano9k -f ./output.fs
+
+# clean up
+rm synth.json
+rm pnr_output.json
+rm output.fs
+rm abc.history
