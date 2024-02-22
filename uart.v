@@ -24,8 +24,8 @@ module uart(
 );
 
 parameter CLK_FREQ=         27000000;
-parameter BAUD_RATE=        4800;
-parameter CLKS_PER_BIT=     5625;
+parameter BAUD_RATE=        115200;
+parameter CLKS_PER_BIT=     234;
 
 wire[7:0]   rx_data;
 reg         rx_data_ready;
@@ -215,7 +215,9 @@ begin
         buffered == 1'b1
     )
     begin
-        tx_data <= buffer[3];
+        idx_latch <= bufferidx;
+        tx_data <= buffer[idx_latch];
+
         put <= 1'b1;
         bufferidx <= bufferidx + 3'd1;
     end
@@ -226,7 +228,7 @@ begin
         bufferidx <= bufferidx;
     end
 
-    else if(bufferidx == 4)
+    else if(bufferidx == 4 && put == 1'b0)
     begin
         put <= 1'b0;
         bufferidx <= bufferidx;
