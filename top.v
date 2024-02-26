@@ -3,6 +3,7 @@
 
 `include "uart.v"
 `include "bus.v"
+`include "st7789.v"
 
 module top
 (
@@ -10,9 +11,26 @@ module top
     input rst_n,
     input rx_pin,
     output tx_pin,
-    output [5:0] led
+    output [5:0] led,
+    output spi_sda,
+    output spi_scl,
+    output spi_dc,
+    output spi_rst
 );
 
+st7789_spi display(
+  // in
+  clk,
+  rst_n,
+
+  // out
+  spi_scl,
+  spi_sda,
+  spi_dc,
+  spi_rst
+);
+
+/*
 localparam WAIT_TIME = 13500000;
 reg [23:0] clockCounter = 0;
 
@@ -80,6 +98,7 @@ uart debugger(
     bus_available[0],
     fulfilled
 );
+*/
 
 endmodule
 
